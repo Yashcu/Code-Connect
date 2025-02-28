@@ -1,21 +1,23 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import React from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import Navbar from './components/Navbar';
+import Home from './pages/Home';
+import PostDetails from './pages/PostDetails';
+import Auth from './pages/Auth';
+import CreatePost from './pages/CreatePost';
 
-function App() {
-  const [message, setMessage] = useState('');
-
-  useEffect(() => {
-    axios.get('http://localhost:5000/')
-      .then(response => setMessage(response.data))
-      .catch(error => console.log(error));
-  }, []);
-
+const App = () => {
   return (
-    <div className="App">
-      <h1>CodeConnect</h1>
-      <p>{message}</p>
-    </div>
+    <Router>
+      <Navbar />
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/posts/:id" element={<PostDetails />} />
+        <Route path="/auth" element={<Auth />} />
+        <Route path="/create-post" element={<CreatePost />} />
+      </Routes>
+    </Router>
   );
-}
+};
 
 export default App;
