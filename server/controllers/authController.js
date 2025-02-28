@@ -27,7 +27,8 @@ const registerUser = async (req, res) => {
       res.status(400).json({ message: 'Invalid user data' });
     }
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    console.error('Register error:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
 
@@ -38,9 +39,21 @@ const loginUser = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const user = await User.findOne({ email });
+    if (!email || !password) {
+      return res.status(400).json({ message: 'Please provide email and password' });
+    }
 
-    if (user && (await user.matchPassword(password))) {
+    const user = await User.findOne({ email });
+    console.log('Login attempt for email:', email);
+    
+    if (!user) {
+      return res.status(401).json({ message: 'User not found' });
+    }
+
+    const isMatch = await user.matchPassword(password);
+    console.log('Password match:', isMatch);
+
+    if (isMatch) {
       res.json({
         _id: user._id,
         name: user.name,
@@ -51,7 +64,8 @@ const loginUser = async (req, res) => {
       res.status(401).json({ message: 'Invalid email or password' });
     }
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    console.error('Login error:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
 

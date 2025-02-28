@@ -4,12 +4,18 @@ const API = axios.create({ baseURL: 'http://localhost:5000/api' });
 
 // Add a request interceptor to include the JWT token in headers
 API.interceptors.request.use((req) => {
-  const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+  try {
+    const userInfoStr = localStorage.getItem('userInfo');
+    if (!userInfoStr) return req;
 
-  if (userInfo && userInfo.token) {
-    req.headers.Authorization = `Bearer ${userInfo.token}`;
+    const userInfo = JSON.parse(userInfoStr);
+    if (userInfo && userInfo.token) {
+      req.headers.Authorization = `Bearer ${userInfo.token}`;
+    }
+  } catch (error) {
+    console.error('Error processing auth token:', error);
+    localStorage.removeItem('userInfo'); // Clear invalid data
   }
-
   return req;
 });
 
@@ -19,6 +25,7 @@ API.interceptors.response.use(
   (error) => {
     if (error.response && error.response.status === 401) {
       // Token is invalid or expired
+      console.error('Authentication error:', error.response.data);
       localStorage.removeItem('userInfo');
       window.location.href = '/auth'; // Redirect to login page
     }
